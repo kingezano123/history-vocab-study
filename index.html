@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History Vocabulary Study Set</title>
+<style>
+:root{
+  --bg:#f6f7fb; --panel:#fff; --text:#1f2430; --muted:#6b7280; --border:#dfe3ea;
+  --accent:#4255ff; --accent-dark:#3144da; --soft:#eef1ff;
+  --good:#16825d; --goodbg:#eaf8f2; --bad:#b93849; --badbg:#fff0f3; --warn:#9a6a00;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1100px;margin:auto;padding:22px 16px 50px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:30px}
+.subtitle{color:var(--muted);margin-top:5px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:#fff;border:1px solid var(--border);padding:8px 11px;border-radius:999px;font-size:13px;font-weight:700}
+.tabs{display:flex;gap:8px;overflow:auto;padding:18px 0 16px}
+.tab{white-space:nowrap;border:1px solid var(--border);background:white;color:#3f4756;border-radius:10px;padding:11px 16px;font-weight:800}
+.tab.active{background:var(--accent);border-color:var(--accent);color:white}
+.view{display:none}.view.active{display:block}
+.panel{background:white;border:1px solid var(--border);border-radius:16px;padding:20px}
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.toolbar-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:0;background:var(--accent);color:#fff;padding:11px 15px;border-radius:10px;font-weight:800}
+.btn:hover{background:var(--accent-dark)}
+.btn.secondary{background:white;color:var(--accent);border:1px solid #cfd5ea}
+.btn.ghost{background:white;color:#3f4756;border:1px solid var(--border)}
+.btn.good{background:var(--good)}
+.btn.bad{background:var(--bad)}
+.iconbtn{width:42px;height:42px;border-radius:10px;border:1px solid var(--border);background:white;font-size:20px}
+.progressbar{height:8px;background:#e8ebf1;border-radius:999px;overflow:hidden}
+.progressbar span{display:block;height:100%;background:var(--accent);width:0;transition:.2s}
+.progressrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700;margin:8px 0 14px}
+.small{font-size:13px;color:var(--muted)}
+.hidden{display:none!important}
+
+/* FLASHCARDS */
+.card-stage{max-width:780px;margin:0 auto}
+.flash-scene{perspective:1200px;height:390px;outline:none}
+.flash-card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:.45s}
+.flash-scene.flipped .flash-card{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--border);border-radius:20px;background:white;box-shadow:0 9px 30px rgba(32,43,70,.08);display:flex;align-items:center;justify-content:center;text-align:center;padding:34px}
+.face.front{font-size:38px;font-weight:850}
+.face.back{transform:rotateY(180deg);font-size:23px;line-height:1.5}
+.flip-hint{position:absolute;bottom:16px;left:0;right:0;color:#9299a8;font-size:13px;font-weight:700}
+.card-controls{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:15px}
+.sidebtn{border:1px solid var(--border);background:white;border-radius:12px;padding:13px 15px;font-weight:800}
+.sidebtn.bad{color:var(--bad);border-color:#efc3ca;background:#fff8f9}
+.sidebtn.good{color:var(--good);border-color:#bfe7d7;background:#f8fffb}
+.centercontrols{display:flex;gap:8px}
+.star.on{color:#d49a00;background:#fff9e9;border-color:#eed594}
+.card-list{margin-top:20px}
+.termrow{display:grid;grid-template-columns:190px 1fr auto;gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid #edf0f4}
+.termrow:last-child{border-bottom:0}
+.term{font-weight:850}.definition-text{line-height:1.45;color:#434b59}
+
+/* QUESTION UI */
+.qwrap{max-width:800px;margin:0 auto}
+.prompt-card{border:1px solid var(--border);border-radius:16px;padding:24px;background:#fff}
+.qtype{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:850;margin-bottom:10px}
+.qprompt{font-size:24px;line-height:1.45;font-weight:800;margin-bottom:20px}
+.answerinput{width:100%;padding:14px 15px;border:1px solid #bcc5d3;border-radius:10px;font-size:18px;outline:none}
+.answerinput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(66,85,255,.12)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice{border:1px solid var(--border);background:#fff;border-radius:11px;padding:13px 14px;text-align:left;font-weight:700}
+.choice:hover{border-color:#b8c0d0}
+.choice.selected{border-color:var(--accent);background:var(--soft)}
+.choice.correct{border-color:var(--good);background:var(--goodbg);color:#0e6848}
+.choice.wrong{border-color:var(--bad);background:var(--badbg);color:#982d3c}
+.feedback{margin-top:14px;padding:13px 14px;border-radius:11px;font-weight:750;line-height:1.45}
+.feedback.good{background:var(--goodbg);color:#0e6848}
+.feedback.bad{background:var(--badbg);color:#982d3c}
+.mastery{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.mastery .pill{background:#fff}
+.summary{text-align:center;padding:24px}
+.bigscore{font-size:60px;font-weight:900;color:var(--accent);line-height:1}
+.review{margin-top:18px;display:grid;gap:10px}
+.review-item{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.review-item strong{display:block;margin-bottom:5px}
+.correcttxt{color:var(--good)}.wrongtxt{color:var(--bad)}
+
+/* TEST SETTINGS */
+.settingsgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.setting{border:1px solid var(--border);border-radius:12px;padding:14px}
+.setting label{display:block;font-weight:800;margin-bottom:8px}
+.checks{display:flex;gap:14px;flex-wrap:wrap}
+.checkline{display:flex;align-items:center;gap:7px}
+.testq{border:1px solid var(--border);border-radius:14px;padding:18px;background:white}
+.testq+.testq{margin-top:12px}
+.test-title{font-size:13px;color:var(--muted);font-weight:800;margin-bottom:7px}
+.test-def{font-size:18px;line-height:1.45;font-weight:750;margin-bottom:12px}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match-card{min-height:105px;border:1px solid var(--border);border-radius:12px;background:white;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:750;line-height:1.35}
+.match-card.selected{border-color:var(--accent);background:var(--soft)}
+.match-card.matched{visibility:hidden}
+.match-card.shake{animation:shake .25s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.timer{font-size:32px;font-weight:900}
+
+/* SPELL */
+.spell-wordbox{font-size:24px;line-height:1.45;font-weight:800;margin:12px 0 18px}
+
+/* RESPONSIVE */
+@media(max-width:720px){
+  h1{font-size:26px}
+  .flash-scene{height:330px}
+  .face.front{font-size:30px}.face.back{font-size:19px}
+  .choices,.settingsgrid{grid-template-columns:1fr}
+  .termrow{grid-template-columns:1fr}
+  .card-controls{grid-template-columns:1fr}
+  .centercontrols{justify-content:center}
+  .match-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="top">
+    <div>
+      <h1>History Vocabulary</h1>
+      <div class="subtitle">10 terms · Medieval / Renaissance vocabulary</div>
+    </div>
+    <div class="stats">
+      <div class="pill" id="starStat">★ 0 starred</div>
+      <div class="pill" id="masteryStat">0 mastered</div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-view="flash">Flashcards</button>
+    <button class="tab" data-view="learn">Learn</button>
+    <button class="tab" data-view="spell">Spell</button>
+    <button class="tab" data-view="test">Test</button>
+    <button class="tab" data-view="match">Match</button>
+  </div>
+
+  <section id="flash" class="view active">
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="btn ghost" id="shuffleBtn">⇄ Shuffle</button>
+        <button class="btn ghost" id="restartFlash">↻ Restart</button>
+      </div>
+      <div class="toolbar-group">
+        <label class="checkline small"><input type="checkbox" id="starOnly"> Study starred only</label>
+      </div>
+    </div>
+    <div class="card-stage">
+      <div class="progressbar"><span id="flashProgress"></span></div>
+      <div class="progressrow"><span id="flashCount">1 / 10</span><span>Click card or press Space to flip</span></div>
+      <div class="flash-scene" id="flashScene" tabindex="0">
+        <div class="flash-card">
+          <div class="face front" id="flashFront"></div>
+          <div class="face back" id="flashBack"></div>
+        </div>
+      </div>
+      <div class="card-controls">
+        <button class="sidebtn bad" id="againBtn">Still learning</button>
+        <div class="centercontrols">
+          <button class="iconbtn" id="prevBtn" title="Previous">←</button>
+          <button class="iconbtn star" id="starBtn" title="Star card">☆</button>
+          <button class="iconbtn" id="nextBtn" title="Next">→</button>
+        </div>
+        <button class="sidebtn good" id="knowBtn">Know it</button>
+      </div>
+    </div>
+    <div class="panel card-list">
+      <div style="font-weight:900;margin-bottom:4px">Terms in this set</div>
+      <div class="small">Star any terms you want to focus on.</div>
+      <div id="termList"></div>
+    </div>
+  </section>
+
+  <section id="learn" class="view">
+    <div class="qwrap">
+      <div class="progressbar"><span id="learnProgress"></span></div>
+      <div class="progressrow"><span id="learnRound">Round 1</span><span id="learnLeft">10 terms left</span></div>
+      <div class="mastery">
+        <div class="pill" id="learnMastered">Mastered: 0</div>
+        <div class="pill" id="learnLearning">Learning: 10</div>
+      </div>
+      <div id="learnArea"></div>
+    </div>
+  </section>
+
+  <section id="spell" class="view">
+    <div class="qwrap">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="btn ghost" id="spellRestart">↻ Restart</button>
+          <label class="checkline small"><input type="checkbox" id="spellStarred"> Starred only</label>
+        </div>
+        <div class="pill" id="spellScore">0 correct</div>
+      </div>
+      <div class="progressbar"><span id="spellProgress"></span></div>
+      <div class="progressrow"><span id="spellCount">1 / 10</span><span>Definition → type the term</span></div>
+      <div id="spellArea"></div>
+    </div>
+  </section>
+
+  <section id="test" class="view">
+    <div id="testSetup" class="panel">
+      <h2 style="margin-top:0">Create a test</h2>
+      <div class="settingsgrid">
+        <div class="setting">
+          <label for="testCount">Number of questions</label>
+          <select id="testCount" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:9px">
+            <option>5</option><option selected>10</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Question types</label>
+          <div class="checks">
+            <label class="checkline"><input type="checkbox" id="typeWritten" checked> Written</label>
+            <label class="checkline"><input type="checkbox" id="typeMC" checked> Multiple choice</label>
+            <label class="checkline"><input type="checkbox" id="typeTF" checked> True / false</label>
+          </div>
+        </div>
+        <div class="setting">
+          <label>Prompt with</label>
+          <div class="checks">
+            <label class="checkline"><input type="radio" name="promptSide" value="definition" checked> Definition</label>
+            <label class="checkline"><input type="radio" name="promptSide" value="term"> Term</label>
+          </div>
+        </div>
+        <div class="setting">
+          <label>Terms</label>
+          <div class="checks">
+            <label class="checkline"><input type="radio" name="testTerms" value="all" checked> All</label>
+            <label class="checkline"><input type="radio" name="testTerms" value="starred"> Starred only</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="createTest" style="margin-top:16px">Create test</button>
+      <div id="testSetupMsg" class="small" style="margin-top:8px"></div>
+    </div>
+    <div id="testArea"></div>
+  </section>
+
+  <section id="match" class="view">
+    <div class="panel">
+      <div class="toolbar">
+        <div>
+          <div class="timer" id="matchTimer">0.0s</div>
+          <div class="small">Match each term to its definition.</div>
+        </div>
+        <button class="btn ghost" id="matchRestart">New round</button>
+      </div>
+      <div id="matchArea"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const data = [
+ {word:"Vernacular",definition:"A language or dialect associated with a particular group of people."},
+ {word:"Fief",definition:"A large area of land ruled over by a lord in medieval times; a feudal estate."},
+ {word:"Fragmentation",definition:"The state of being divided, broken off, or detached."},
+ {word:"Schism",definition:"A division among the members of a group that occurs because they disagree about something."},
+ {word:"Excommunicate",definition:"To officially remove or exclude someone from membership in the Roman Catholic Church."},
+ {word:"Seclusion",definition:"The act of placing or keeping someone away from other people."},
+ {word:"Truce",definition:"An agreement between enemies or opponents to stop fighting or arguing for a certain period of time."},
+ {word:"Guild",definition:"An organized group of people who share the same job or interest, especially an association of people who made or sold goods in the Middle Ages."},
+ {word:"Vassal",definition:"A person who received protection and land from a lord in return for loyalty and service."},
+ {word:"Humanists",definition:"People in the fifteenth-century European humanist movement who were influenced by ancient Greek and Roman ideas and studied grammar, rhetoric, poetry, history, languages, and moral philosophy."}
+];
+
+const state = {
+  starred:new Set(),
+  mastered:new Set(),
+  flashDeck:[...data],
+  flashIndex:0,
+  learnScores:Object.fromEntries(data.map(x=>[x.word,0])),
+  learnRound:1,
+  learnQueue:[],
+  learnCurrent:null,
+  learnAnswered:false
+};
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
+const norm=s=>String(s||"").trim().toLowerCase().replace(/\s+/g," ");
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+
+function updateStats(){
+  $("#starStat").textContent=`★ ${state.starred.size} starred`;
+  $("#masteryStat").textContent=`${state.mastered.size} mastered`;
+}
+function showView(id){
+  $$(".tab").forEach(x=>x.classList.toggle("active",x.dataset.view===id));
+  $$(".view").forEach(x=>x.classList.toggle("active",x.id===id));
+  if(id==="learn" && !state.learnQueue.length) startLearn();
+  if(id==="spell") startSpell();
+  if(id==="match") startMatch();
+}
+$$(".tab").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+
+/* FLASHCARDS */
+function getFlashSource(){
+  const starredOnly=$("#starOnly").checked;
+  return starredOnly ? data.filter(x=>state.starred.has(x.word)) : state.flashDeck;
+}
+function renderFlash(){
+  const deck=getFlashSource();
+  if(!deck.length){
+    $("#flashFront").innerHTML=`<div><div style="font-size:25px">No starred terms yet</div><div class="small" style="margin-top:8px">Star a term, then use starred-only mode.</div></div>`;
+    $("#flashBack").textContent="";
+    $("#flashCount").textContent="0 / 0"; $("#flashProgress").style.width="0%"; return;
+  }
+  state.flashIndex=Math.max(0,Math.min(state.flashIndex,deck.length-1));
+  const item=deck[state.flashIndex];
+  $("#flashFront").innerHTML=esc(item.word)+`<div class="flip-hint">Click to flip</div>`;
+  $("#flashBack").innerHTML=esc(item.definition)+`<div class="flip-hint">Click to flip back</div>`;
+  $("#flashCount").textContent=`${state.flashIndex+1} / ${deck.length}`;
+  $("#flashProgress").style.width=`${((state.flashIndex+1)/deck.length)*100}%`;
+  $("#flashScene").classList.remove("flipped");
+  $("#starBtn").textContent=state.starred.has(item.word)?"★":"☆";
+  $("#starBtn").classList.toggle("on",state.starred.has(item.word));
+}
+function renderTermList(){
+  $("#termList").innerHTML=data.map(x=>`
+    <div class="termrow">
+      <div class="term">${esc(x.word)}</div>
+      <div class="definition-text">${esc(x.definition)}</div>
+      <button class="iconbtn termStar ${state.starred.has(x.word)?"on":""}" data-word="${esc(x.word)}">${state.starred.has(x.word)?"★":"☆"}</button>
+    </div>`).join("");
+  $$(".termStar").forEach(b=>b.addEventListener("click",()=>{
+    toggleStar(b.dataset.word); renderTermList(); renderFlash();
+  }));
+}
+function toggleStar(word){
+  state.starred.has(word)?state.starred.delete(word):state.starred.add(word);
+  updateStats();
+}
+$("#flashScene").addEventListener("click",()=>$("#flashScene").classList.toggle("flipped"));
+$("#flashScene").addEventListener("keydown",e=>{
+  if(e.key===" "||e.key==="Enter"){e.preventDefault();$("#flashScene").classList.toggle("flipped")}
+  if(e.key==="ArrowRight"){$("#nextBtn").click()}
+  if(e.key==="ArrowLeft"){$("#prevBtn").click()}
+});
+$("#nextBtn").addEventListener("click",()=>{
+  const d=getFlashSource(); if(!d.length)return; state.flashIndex=(state.flashIndex+1)%d.length; renderFlash();
+});
+$("#prevBtn").addEventListener("click",()=>{
+  const d=getFlashSource(); if(!d.length)return; state.flashIndex=(state.flashIndex-1+d.length)%d.length; renderFlash();
+});
+$("#starBtn").addEventListener("click",()=>{
+  const d=getFlashSource(); if(!d.length)return; toggleStar(d[state.flashIndex].word); renderTermList(); renderFlash();
+});
+$("#shuffleBtn").addEventListener("click",()=>{state.flashDeck=shuffle(data);state.flashIndex=0;renderFlash()});
+$("#restartFlash").addEventListener("click",()=>{state.flashDeck=[...data];state.flashIndex=0;renderFlash()});
+$("#starOnly").addEventListener("change",()=>{state.flashIndex=0;renderFlash()});
+$("#knowBtn").addEventListener("click",()=>{
+  const d=getFlashSource(); if(!d.length)return; state.mastered.add(d[state.flashIndex].word); updateStats(); $("#nextBtn").click();
+});
+$("#againBtn").addEventListener("click",()=>{
+  const d=getFlashSource(); if(!d.length)return; state.mastered.delete(d[state.flashIndex].word); updateStats(); $("#nextBtn").click();
+});
+
+/* LEARN */
+function startLearn(){
+  state.learnScores=Object.fromEntries(data.map(x=>[x.word,0]));
+  state.learnRound=1; state.learnQueue=shuffle(data); state.learnAnswered=false;
+  renderLearn();
+}
+function learnStats(){
+  const mastered=data.filter(x=>state.learnScores[x.word]>=2).length;
+  $("#learnMastered").textContent=`Mastered: ${mastered}`;
+  $("#learnLearning").textContent=`Learning: ${data.length-mastered}`;
+  $("#learnProgress").style.width=`${mastered/data.length*100}%`;
+  $("#learnRound").textContent=`Round ${state.learnRound}`;
+  $("#learnLeft").textContent=`${data.length-mastered} terms left`;
+}
+function renderLearn(){
+  learnStats();
+  const allDone=data.every(x=>state.learnScores[x.word]>=2);
+  if(allDone){
+    state.mastered=new Set(data.map(x=>x.word)); updateStats();
+    $("#learnArea").innerHTML=`<div class="panel summary">
+      <div class="bigscore">100%</div><h2>You mastered the set</h2>
+      <p class="small">Each term was answered correctly more than once.</p>
+      <button class="btn" id="restartLearn">Study again</button></div>`;
+    $("#restartLearn").addEventListener("click",startLearn); return;
+  }
+  if(!state.learnQueue.length){
+    state.learnRound++;
+    state.learnQueue=shuffle(data.filter(x=>state.learnScores[x.word]<2));
+  }
+  const item=state.learnQueue.shift(); state.learnCurrent=item; state.learnAnswered=false;
+  const useMC=Math.random()<0.55;
+  if(useMC){
+    const choices=shuffle([item.word,...shuffle(data.filter(x=>x.word!==item.word)).slice(0,3).map(x=>x.word)]);
+    $("#learnArea").innerHTML=`<div class="prompt-card">
+      <div class="qtype">Choose the term</div><div class="qprompt">${esc(item.definition)}</div>
+      <div class="choices">${choices.map(c=>`<button class="choice learnChoice" data-value="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+      <div id="learnFeedback"></div></div>`;
+    $$(".learnChoice").forEach(b=>b.addEventListener("click",()=>gradeLearn(b.dataset.value,b)));
+  }else{
+    $("#learnArea").innerHTML=`<div class="prompt-card">
+      <div class="qtype">Write the term</div><div class="qprompt">${esc(item.definition)}</div>
+      <form id="learnForm"><input class="answerinput" id="learnInput" autocomplete="off" spellcheck="false" placeholder="Type your answer...">
+      <button class="btn" style="margin-top:12px" type="submit">Answer</button></form>
+      <div id="learnFeedback"></div></div>`;
+    $("#learnForm").addEventListener("submit",e=>{e.preventDefault();gradeLearn($("#learnInput").value,null)});
+    setTimeout(()=>$("#learnInput").focus(),0);
+  }
+}
+function gradeLearn(answer,button){
+  if(state.learnAnswered)return; state.learnAnswered=true;
+  const item=state.learnCurrent, ok=norm(answer)===norm(item.word);
+  if(ok) state.learnScores[item.word]=Math.min(2,state.learnScores[item.word]+1);
+  else state.learnScores[item.word]=Math.max(0,state.learnScores[item.word]-1);
+  if(button){
+    $$(".learnChoice").forEach(b=>{
+      if(b.dataset.value===item.word)b.classList.add("correct");
+      else if(b===button)b.classList.add("wrong");
+      b.disabled=true;
+    });
+  }else $("#learnInput").disabled=true;
+  $("#learnFeedback").innerHTML=`<div class="feedback ${ok?"good":"bad"}">${ok?"✓ Correct":"✗ Not quite"}${ok?"":` — correct answer: <strong>${esc(item.word)}</strong>`}</div>
+  <button class="btn" id="learnNext" style="margin-top:12px">Continue</button>`;
+  $("#learnNext").addEventListener("click",renderLearn);
+  learnStats();
+}
+
+/* SPELL */
+let spellDeck=[],spellIndex=0,spellCorrect=0,spellMissed=[];
+function startSpell(){
+  spellDeck=shuffle($("#spellStarred").checked?data.filter(x=>state.starred.has(x.word)):data);
+  spellIndex=0;spellCorrect=0;spellMissed=[];renderSpell();
+}
+function renderSpell(){
+  $("#spellScore").textContent=`${spellCorrect} correct`;
+  if(!spellDeck.length){
+    $("#spellArea").innerHTML=`<div class="panel">No starred terms yet.</div>`;
+    $("#spellCount").textContent="0 / 0";$("#spellProgress").style.width="0%";return;
+  }
+  if(spellIndex>=spellDeck.length){
+    $("#spellProgress").style.width="100%";
+    $("#spellArea").innerHTML=`<div class="panel summary"><div class="bigscore">${spellCorrect}/${spellDeck.length}</div>
+    <h2>Spell round complete</h2><p class="small">${spellMissed.length?`${spellMissed.length} to review`:"Perfect round"}</p>
+    <button class="btn" id="spellAgain">Practice again</button>
+    <div class="review">${spellMissed.map(x=>`<div class="review-item"><strong>${esc(x.word)}</strong><div>${esc(x.definition)}</div></div>`).join("")}</div></div>`;
+    $("#spellAgain").addEventListener("click",startSpell);return;
+  }
+  const item=spellDeck[spellIndex];
+  $("#spellCount").textContent=`${spellIndex+1} / ${spellDeck.length}`;
+  $("#spellProgress").style.width=`${spellIndex/spellDeck.length*100}%`;
+  $("#spellArea").innerHTML=`<div class="prompt-card">
+    <div class="qtype">Spell the term</div><div class="spell-wordbox">${esc(item.definition)}</div>
+    <form id="spellForm"><input class="answerinput" id="spellInput" autocomplete="off" spellcheck="false" placeholder="Type the term...">
+    <div class="toolbar-group" style="margin-top:12px"><button class="btn" type="submit">Check</button><button class="btn ghost" type="button" id="spellGiveUp">I don't know</button></div></form>
+    <div id="spellFeedback"></div></div>`;
+  $("#spellForm").addEventListener("submit",e=>{e.preventDefault();gradeSpell(false)});
+  $("#spellGiveUp").addEventListener("click",()=>gradeSpell(true));
+  setTimeout(()=>$("#spellInput").focus(),0);
+}
+function gradeSpell(giveUp){
+  const item=spellDeck[spellIndex], ans=$("#spellInput").value, ok=!giveUp&&norm(ans)===norm(item.word);
+  $("#spellInput").disabled=true; $("#spellGiveUp").disabled=true;
+  if(ok){spellCorrect++;state.mastered.add(item.word)}
+  else{spellMissed.push(item);state.mastered.delete(item.word)}
+  updateStats();
+  $("#spellFeedback").innerHTML=`<div class="feedback ${ok?"good":"bad"}">${ok?"✓ Correct":`✗ Correct answer: <strong>${esc(item.word)}</strong>`}</div>
+  <button class="btn" id="spellNext" style="margin-top:12px">Next</button>`;
+  $("#spellNext").addEventListener("click",()=>{spellIndex++;renderSpell()});
+}
+$("#spellRestart").addEventListener("click",startSpell);
+$("#spellStarred").addEventListener("change",startSpell);
+
+/* TEST */
+$("#createTest").addEventListener("click",buildTest);
+function buildTest(){
+  const types=[];
+  if($("#typeWritten").checked)types.push("written");
+  if($("#typeMC").checked)types.push("mc");
+  if($("#typeTF").checked)types.push("tf");
+  if(!types.length){$("#testSetupMsg").textContent="Choose at least one question type.";return}
+  let pool=$('input[name="testTerms"]:checked').value==="starred"?data.filter(x=>state.starred.has(x.word)):data;
+  if(!pool.length){$("#testSetupMsg").textContent="You don't have any starred terms yet.";return}
+  $("#testSetupMsg").textContent="";
+  const count=Math.min(parseInt($("#testCount").value,10),pool.length);
+  const promptSide=$('input[name="promptSide"]:checked').value;
+  const chosen=shuffle(pool).slice(0,count);
+  const qs=chosen.map((item,i)=>({item,type:types[i%types.length]}));
+  $("#testSetup").classList.add("hidden");
+  $("#testArea").innerHTML=`<form id="testForm" class="qwrap">${qs.map((q,i)=>renderTestQuestion(q,i,promptSide)).join("")}
+  <button class="btn" type="submit" style="margin-top:14px">Submit test</button></form>`;
+  $("#testForm").addEventListener("submit",e=>{e.preventDefault();gradeTest(qs,promptSide,new FormData(e.target))});
+}
+function renderTestQuestion(q,i,side){
+  const prompt=side==="definition"?q.item.definition:q.item.word;
+  const answer=side==="definition"?q.item.word:q.item.definition;
+  if(q.type==="written") return `<div class="testq"><div class="test-title">Question ${i+1} · Written</div><div class="test-def">${esc(prompt)}</div>
+    <input class="answerinput" name="q${i}" autocomplete="off" spellcheck="false"><input type="hidden" name="a${i}" value="${esc(answer)}"></div>`;
+  if(q.type==="mc"){
+    const options=shuffle([answer,...shuffle(data.filter(x=>x.word!==q.item.word)).slice(0,3).map(x=>side==="definition"?x.word:x.definition)]);
+    return `<div class="testq"><div class="test-title">Question ${i+1} · Multiple choice</div><div class="test-def">${esc(prompt)}</div>
+    <div class="choices">${options.map(o=>`<label class="choice"><input type="radio" name="q${i}" value="${esc(o)}"> <span>${esc(o)}</span></label>`).join("")}</div>
+    <input type="hidden" name="a${i}" value="${esc(answer)}"></div>`;
+  }
+  const isTrue=Math.random()<.5;
+  let shown=answer;
+  if(!isTrue){
+    const alt=shuffle(data.filter(x=>x.word!==q.item.word))[0];
+    shown=side==="definition"?alt.word:alt.definition;
+  }
+  return `<div class="testq"><div class="test-title">Question ${i+1} · True / false</div>
+    <div class="test-def">${esc(prompt)}</div><div class="small" style="margin-bottom:10px">Answer: <strong>${esc(shown)}</strong></div>
+    <div class="choices"><label class="choice"><input type="radio" name="q${i}" value="true"> True</label>
+    <label class="choice"><input type="radio" name="q${i}" value="false"> False</label></div>
+    <input type="hidden" name="a${i}" value="${isTrue?"true":"false"}"></div>`;
+}
+function gradeTest(qs,side,fd){
+  let score=0,review=[];
+  qs.forEach((q,i)=>{
+    const expected=fd.get(`a${i}`)||"",got=fd.get(`q${i}`)||"";
+    const ok=norm(expected)===norm(got); if(ok)score++;
+    review.push({ok,expected,got:got||"(blank)",prompt:side==="definition"?q.item.definition:q.item.word});
+  });
+  const pct=Math.round(score/qs.length*100);
+  $("#testArea").innerHTML=`<div class="qwrap"><div class="panel summary"><div class="bigscore">${pct}%</div><h2>${score} / ${qs.length} correct</h2>
+    <div class="toolbar-group" style="justify-content:center"><button class="btn" id="testAgain">New test</button><button class="btn ghost" id="reviewSetup">Change settings</button></div>
+    <div class="review">${review.map((r,i)=>`<div class="review-item"><strong>Question ${i+1} — <span class="${r.ok?"correcttxt":"wrongtxt"}">${r.ok?"Correct":"Incorrect"}</span></strong>
+      <div>${esc(r.prompt)}</div><div class="small" style="margin-top:5px">Your answer: ${esc(r.got)}</div>${r.ok?"":`<div class="correcttxt">Correct answer: ${esc(r.expected)}</div>`}</div>`).join("")}</div></div></div>`;
+  $("#testAgain").addEventListener("click",()=>{ $("#testSetup").classList.remove("hidden"); $("#testArea").innerHTML=""; buildTest(); });
+  $("#reviewSetup").addEventListener("click",()=>{$("#testSetup").classList.remove("hidden");$("#testArea").innerHTML=""});
+}
+
+/* MATCH */
+let matchStart=0,matchTimerId=null,matchFirst=null;
+function startMatch(){
+  if(matchTimerId)clearInterval(matchTimerId);
+  matchFirst=null; $("#matchTimer").textContent="0.0s";
+  const subset=shuffle(data).slice(0,5);
+  const cards=shuffle(subset.flatMap(x=>[
+    {id:x.word,type:"term",text:x.word},
+    {id:x.word,type:"def",text:x.definition}
+  ]));
+  $("#matchArea").innerHTML=`<div class="match-grid">${cards.map((c,i)=>`<button class="match-card" data-id="${esc(c.id)}" data-type="${c.type}" data-i="${i}">${esc(c.text)}</button>`).join("")}</div>`;
+  matchStart=performance.now();
+  matchTimerId=setInterval(()=>{$("#matchTimer").textContent=((performance.now()-matchStart)/1000).toFixed(1)+"s"},100);
+  $$(".match-card").forEach(b=>b.addEventListener("click",()=>matchClick(b)));
+}
+function matchClick(b){
+  if(b.classList.contains("matched"))return;
+  if(!matchFirst){matchFirst=b;b.classList.add("selected");return}
+  if(matchFirst===b){b.classList.remove("selected");matchFirst=null;return}
+  const ok=matchFirst.dataset.id===b.dataset.id && matchFirst.dataset.type!==b.dataset.type;
+  if(ok){
+    matchFirst.classList.remove("selected");matchFirst.classList.add("matched");b.classList.add("matched");matchFirst=null;
+    if($$(".match-card:not(.matched)").length===0){
+      clearInterval(matchTimerId); const t=((performance.now()-matchStart)/1000).toFixed(1);
+      $("#matchTimer").textContent=t+"s";
+      $("#matchArea").innerHTML=`<div class="summary"><div class="bigscore">${t}s</div><h2>Round complete</h2><button class="btn" id="matchAgain">Play again</button></div>`;
+      $("#matchAgain").addEventListener("click",startMatch);
+    }
+  }else{
+    const a=matchFirst; a.classList.remove("selected"); a.classList.add("shake"); b.classList.add("shake"); matchFirst=null;
+    setTimeout(()=>{a.classList.remove("shake");b.classList.remove("shake")},260);
+  }
+}
+$("#matchRestart").addEventListener("click",startMatch);
+
+/* init */
+renderFlash();renderTermList();updateStats();
+
+/* global keyboard flash behavior only while flash visible */
+document.addEventListener("keydown",e=>{
+  if(!$("#flash").classList.contains("active"))return;
+  const tag=document.activeElement.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
+  if(e.key===" "){e.preventDefault();$("#flashScene").classList.toggle("flipped")}
+  if(e.key==="ArrowRight")$("#nextBtn").click();
+  if(e.key==="ArrowLeft")$("#prevBtn").click();
+});
+})();
+</script>
+</body>
+</html>
