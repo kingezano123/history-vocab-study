@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>la4awale Clicker</title>
+<meta name="theme-color" content="#17131f"/>
+<style>
+:root{
+  --bg:#120f18;--panel:#1c1726;--panel2:#251d31;--text:#fff7e8;--muted:#b9adca;
+  --gold:#ffcc66;--purple:#9f7aea;--green:#73e2a7;--danger:#ff7b88;
+}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 20% 20%,rgba(159,122,234,.18),transparent 30%),
+radial-gradient(circle at 80% 10%,rgba(255,204,102,.12),transparent 28%),var(--bg);color:var(--text);min-height:100vh}
+button{font:inherit}.app{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(330px,.9fr);min-height:100vh}
+.left{padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,.08)}
+.right{padding:24px;overflow:auto;max-height:100vh}.brand{position:absolute;top:20px;left:24px;font-weight:900;letter-spacing:.3px}
+.brand span{color:var(--gold)}.score{text-align:center;margin-bottom:22px}.score h1{margin:0;font-size:clamp(34px,6vw,68px);line-height:1}.score p{margin:9px 0 0;color:var(--muted);font-weight:700}
+.main-btn{width:min(42vw,340px);height:min(42vw,340px);min-width:220px;min-height:220px;border:0;border-radius:50%;cursor:pointer;color:white;font-weight:1000;font-size:clamp(34px,6vw,64px);letter-spacing:-2px;
+background:radial-gradient(circle at 32% 28%,#d9b8ff 0 8%,#9f7aea 24%,#6c48b8 70%,#492c80 100%);
+box-shadow:0 24px 70px rgba(77,43,125,.55),inset 0 8px 24px rgba(255,255,255,.22),inset 0 -14px 28px rgba(0,0,0,.24);
+transition:transform .08s ease,filter .15s ease;user-select:none;-webkit-tap-highlight-color:transparent}
+.main-btn:hover{filter:brightness(1.08)}.main-btn:active,.main-btn.pop{transform:scale(.94)}
+.sub{margin-top:18px;color:var(--muted);text-align:center;font-size:14px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}.chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:9px 12px;border-radius:999px;color:#ddd2e8;font-size:13px}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px}.section-title h2{margin:0;font-size:22px}.section-title small{color:var(--muted)}
+.shop{display:grid;gap:12px}.item{display:grid;grid-template-columns:54px 1fr auto;gap:13px;align-items:center;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.icon{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:28px}.item h3{margin:0 0 4px;font-size:16px}.item p{margin:0;color:var(--muted);font-size:12px;line-height:1.35}.buy{border:0;border-radius:14px;padding:10px 12px;background:var(--gold);color:#25190a;font-weight:900;cursor:pointer;min-width:94px}.buy:disabled{opacity:.35;cursor:not-allowed}.owned{display:block;font-size:11px;margin-top:3px;color:#6d5120}
+.toolbar{display:flex;gap:8px;margin:18px 0}.secondary{flex:1;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);padding:10px;border-radius:12px;cursor:pointer}.secondary:hover{background:rgba(255,255,255,.09)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#fff;color:#1b1422;padding:10px 14px;border-radius:12px;font-weight:800;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.float{position:fixed;pointer-events:none;font-weight:1000;color:var(--gold);text-shadow:0 2px 8px #000;animation:fly .75s ease forwards}@keyframes fly{to{transform:translateY(-70px) scale(1.2);opacity:0}}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(115,226,167,.12);color:var(--green);font-size:11px;font-weight:800;margin-top:5px}
+@media(max-width:850px){.app{grid-template-columns:1fr}.left{min-height:70vh;border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}.right{max-height:none}.brand{position:static;align-self:flex-start;margin-bottom:35px}.main-btn{width:min(68vw,320px);height:min(68vw,320px)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="left">
+    <div class="brand">la4awale<span>.clicker</span></div>
+    <div class="score">
+      <h1 id="score">0</h1>
+      <p>la4awales</p>
+    </div>
+    <button id="mainBtn" class="main-btn" aria-label="Click la4awale">la4awale</button>
+    <div class="stats">
+      <div class="chip">Per click: <b id="perClick">1</b></div>
+      <div class="chip">Per second: <b id="perSec">0</b></div>
+      <div class="chip">Total clicks: <b id="clicks">0</b></div>
+    </div>
+    <div class="sub">Click la4awale. Get more la4awales. Build the la4awale empire.</div>
+  </main>
+
+  <aside class="right">
+    <div class="section-title">
+      <h2>Upgrades</h2><small>buy power</small>
+    </div>
+    <div id="shop" class="shop"></div>
+    <div class="toolbar">
+      <button class="secondary" id="saveBtn">Save game</button>
+      <button class="secondary" id="resetBtn">Reset</button>
+    </div>
+  </aside>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const upgrades = [
+  {id:'finger',name:'Fast Finger',icon:'☝️',desc:'+1 la4awale per click',base:15,kind:'click',amount:1},
+  {id:'double',name:'Double Tap',icon:'✌️',desc:'+3 la4awales per click',base:75,kind:'click',amount:3},
+  {id:'friend',name:'La4awale Friend',icon:'🧍',desc:'+1 la4awale every second',base:50,kind:'auto',amount:1},
+  {id:'squad',name:'La4awale Squad',icon:'👥',desc:'+5 la4awales every second',base:280,kind:'auto',amount:5},
+  {id:'factory',name:'La4awale Factory',icon:'🏭',desc:'+25 la4awales every second',base:1500,kind:'auto',amount:25},
+  {id:'server',name:'La4awale Server',icon:'🖥️',desc:'+120 la4awales every second',base:8500,kind:'auto',amount:120},
+  {id:'planet',name:'La4awale Planet',icon:'🪐',desc:'+650 la4awales every second',base:52000,kind:'auto',amount:650}
+];
+
+const fresh = () => ({score:0,totalClicks:0,totalEarned:0,owned:{},lastSaved:Date.now()});
+let state = load();
+
+function load(){
+  try{
+    const raw=localStorage.getItem('la4awale-clicker-save');
+    if(!raw) return fresh();
+    const s={...fresh(),...JSON.parse(raw)};
+    const away=Math.min(60*60*8,(Date.now()-(s.lastSaved||Date.now()))/1000);
+    const auto=calcAuto(s);
+    if(away>5 && auto>0){
+      const earned=Math.floor(away*auto);
+      s.score+=earned;s.totalEarned+=earned;
+      setTimeout(()=>toast('Offline bonus: +'+fmt(earned)+' la4awales'),300);
+    }
+    return s;
+  }catch(e){return fresh()}
+}
+function calcClick(s=state){let v=1;for(const u of upgrades)if(u.kind==='click')v+=(s.owned[u.id]||0)*u.amount;return v}
+function calcAuto(s=state){let v=0;for(const u of upgrades)if(u.kind==='auto')v+=(s.owned[u.id]||0)*u.amount;return v}
+function cost(u){const n=state.owned[u.id]||0;return Math.floor(u.base*Math.pow(1.16,n))}
+function fmt(n){
+  if(n<1000)return Math.floor(n).toLocaleString();
+  const units=['K','M','B','T','Qa','Qi'];let i=-1;let x=n;
+  while(x>=1000&&i<units.length-1){x/=1000;i++}
+  return x.toFixed(x>=100?0:x>=10?1:2)+units[i]
+}
+function render(){
+  document.getElementById('score').textContent=fmt(state.score);
+  document.getElementById('perClick').textContent=fmt(calcClick());
+  document.getElementById('perSec').textContent=fmt(calcAuto());
+  document.getElementById('clicks').textContent=fmt(state.totalClicks);
+  document.getElementById('shop').innerHTML=upgrades.map(u=>{
+    const c=cost(u),n=state.owned[u.id]||0;
+    return '<div class="item"><div class="icon">'+u.icon+'</div><div><h3>'+u.name+'</h3><p>'+u.desc+'</p>'+(n?'<span class="badge">Owned: '+n+'</span>':'')+'</div><button class="buy" data-id="'+u.id+'" '+(state.score<c?'disabled':'')+'>'+fmt(c)+'<span class="owned">la4awales</span></button></div>'
+  }).join('');
+  document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>buy(b.dataset.id));
+}
+function buy(id){
+  const u=upgrades.find(x=>x.id===id),c=cost(u);
+  if(state.score<c)return;
+  state.score-=c;state.owned[id]=(state.owned[id]||0)+1;
+  toast(u.name+' purchased');render();save(false);
+}
+function save(show=true){state.lastSaved=Date.now();localStorage.setItem('la4awale-clicker-save',JSON.stringify(state));if(show)toast('Game saved')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
+function floatText(x,y,text){const el=document.createElement('div');el.className='float';el.textContent='+'+text;el.style.left=(x-10)+'px';el.style.top=(y-15)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),800)}
+document.getElementById('mainBtn').addEventListener('click',e=>{
+  const amount=calcClick();state.score+=amount;state.totalEarned+=amount;state.totalClicks++;
+  e.currentTarget.classList.add('pop');setTimeout(()=>e.currentTarget.classList.remove('pop'),80);
+  floatText(e.clientX||innerWidth/2,e.clientY||innerHeight/2,fmt(amount));render();
+});
+document.getElementById('saveBtn').onclick=()=>save(true);
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('Reset all la4awale progress?')){state=fresh();save(false);render();toast('Progress reset')}
+};
+setInterval(()=>{const a=calcAuto();if(a){state.score+=a/10;state.totalEarned+=a/10;render()}},100);
+setInterval(()=>save(false),10000);
+addEventListener('beforeunload',()=>save(false));
+render();
+</script>
+</body>
+</html>
