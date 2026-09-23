@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Friend Group Awards 💀</title>
+<style>
+:root{--bg:#0b0d12;--card:#151922;--text:#f6f7fb;--muted:#a9b0bf;--accent:#7c5cff;--line:#282e3b}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#0b0d12,#10131a);color:var(--text)}
+.wrap{max-width:760px;margin:auto;padding:28px 16px 70px}
+.hero{text-align:center;margin:18px 0 28px}.hero h1{font-size:clamp(32px,7vw,54px);margin:0 0 8px}.hero p{color:var(--muted);margin:0}
+.card{background:rgba(21,25,34,.96);border:1px solid var(--line);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.q{font-weight:800;font-size:19px;margin-bottom:14px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+label{display:block;cursor:pointer}
+input[type=radio]{position:absolute;opacity:0}
+.choice{display:block;text-align:center;padding:12px 8px;border:1px solid #343b4b;border-radius:12px;background:#10141c;transition:.15s}
+input:checked+.choice{border-color:var(--accent);background:#221b4b;box-shadow:0 0 0 2px rgba(124,92,255,.2)}
+button{width:100%;border:0;border-radius:15px;padding:16px;font-size:18px;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c5cff,#5c7cff);cursor:pointer;margin-top:18px}
+button:disabled{opacity:.55;cursor:not-allowed}
+#msg{text-align:center;margin-top:14px;font-weight:700}.muted{color:var(--muted);font-size:13px;text-align:center;margin-top:12px}
+@media(max-width:520px){.options{grid-template-columns:1fr 1fr}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Friend Group Awards 💀</h1>
+    <p>Vote once for each category. Don't sell 😭</p>
+  </div>
+  <form id="voteForm"></form>
+  <button id="submitBtn" type="button">Submit my votes</button>
+  <div id="msg"></div>
+  <div class="muted">Anonymous. Results will be revealed at the end.</div>
+</div>
+<script>
+const names=["Jacob","Micheal","Yosief","Evan","Nathan","Brook","Kidus","Leul","Noah","Nahom"];
+const qs=[
+ ["chopped","Who’s most chopped here?"],
+ ["funniest","Who’s funniest?"],
+ ["richest","Who’s going to be richest?"],
+ ["ego","Who has biggest ego here?"],
+ ["music","Best music taste?"],
+ ["hair","Best hair?"],
+ ["athletic","Most athletic?"],
+ ["accidental_date","Most likely to accidentally date a dude?"],
+ ["dumbest","Dumbest?"],
+ ["frat","Most likely to join a frat?"],
+ ["mcdonalds","Most likely to work at McDonald’s?"]
+];
+const form=document.getElementById("voteForm");
+for(const [key,title] of qs){
+  const card=document.createElement("section"); card.className="card";
+  card.innerHTML='<div class="q">'+title+'</div><div class="options">'+names.map(n =>
+    '<label><input required type="radio" name="'+key+'" value="'+n+'"><span class="choice">'+n+'</span></label>'
+  ).join("")+'</div>';
+  form.appendChild(card);
+}
+const btn=document.getElementById("submitBtn"), msg=document.getElementById("msg");
+btn.onclick=async()=>{
+  if(localStorage.getItem("friendAwardsVoted")){msg.textContent="You already voted on this device 👀";return;}
+  const data={};
+  for(const [key] of qs){
+    const el=document.querySelector('input[name="'+key+'"]:checked');
+    if(!el){msg.textContent="Answer every question first 😭";el?.scrollIntoView();return;}
+    data[key]=el.value;
+  }
+  btn.disabled=true; btn.textContent="Submitting...";
+  try{
+    const r=await fetch("https://hooks.airtable.com/workflows/v1/genericWebhook/appnphowtDYs7Snj9/wfl2x7uYJB3rMuYUm/wtrHan7GqjE3TTvTc",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
+    });
+    if(!r.ok) throw new Error("submit failed");
+    localStorage.setItem("friendAwardsVoted","1");
+    form.style.display="none"; btn.style.display="none";
+    msg.textContent="Vote submitted ✅";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(e){
+    msg.textContent="Couldn’t submit. Tell Jacob to activate the form first.";
+    btn.disabled=false; btn.textContent="Submit my votes";
+  }
+};
+</script>
+</body>
+</html>
